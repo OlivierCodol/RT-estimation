@@ -1,9 +1,9 @@
-function i_knee = segmented_linear(roc)
+function [i_knee, varargout] = segmented_linear(roc)
 
 i_knee = NaN;
 window_width = 2;
 
-[LB,UB] = deal(0, .75);
+[LB,UB] = deal(.25, .75);
 n_samples = numel(roc);
 knee_range = [1, n_samples];
 first_reliable_departure_from_chance = find((roc(knee_range(1):knee_range(2)) >= UB) | (roc(knee_range(1):knee_range(2)) <= LB),1);
@@ -40,6 +40,10 @@ for i = 1:(tstop-tstart+1)          % for every potential knee point
 end
 
 [~,i_min] = min(SSE);
+bestline_y(1:i_min) = mean(roc(tstart:tstart+i_min));
+bestline_y(i_min:end) = linspace(bestline_y(i_min), roc(tstop), length(bestline_y(i_min:end)));
+
 i_knee = i_min + tstart - 1;
+varargout = {bestline_y};
 
 end

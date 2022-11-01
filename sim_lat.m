@@ -1,3 +1,4 @@
+clearvars
 
 %----------------------
 % simulation parameters
@@ -5,8 +6,7 @@
 n_trials_per_cond = 50;
 n_samples = 400;
 slope = 0.05;
-latency_var = 15;
-n_sim = 100;
+latency_var = 0;
 
 
 %-------------------------
@@ -24,7 +24,7 @@ noises = linspace(0, 1, 50);
 mid = latency_var * randn(n_trials, 1) + n_samples / 2;
 thres = 0.05;
 ramp = max(sigmoid(x, mid, slope) - thres, 0);
-
+ramp = ramp / max(ramp(:));
 
 %-------------------------
 % plot example signal
@@ -50,6 +50,8 @@ end
 %----------------
 % allocate memory
 %----------------
+n_sim = 100;
+
 rocc_estimate = nan(numel(noises), n_sim);
 extr_estimate = nan(numel(noises), n_sim);
 m5pc_estimate = nan(numel(noises), n_sim);
