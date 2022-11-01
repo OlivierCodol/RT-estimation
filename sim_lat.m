@@ -22,7 +22,8 @@ n_trials = numel(condition);
 x = 1:n_samples;
 noises = linspace(0, 1, 50);
 mid = latency_var * randn(n_trials, 1) + n_samples / 2;
-ramp = sigmoid(x, mid, slope);
+thres = 0.05;
+ramp = max(sigmoid(x, mid, slope) - thres, 0);
 
 
 %-------------------------
@@ -35,6 +36,17 @@ xlabel('sample')
 ylabel('signal [a.u.]')
 
 
+%--------------------
+% find "ground truth"
+%--------------------
+latency_true = nan(n_trials, 1);
+for k = 1:n_trials
+    % where the (noiseless) signal rises above 5% of the plateau
+    % (this is because sigmoid signals only asymptote to 0)
+    latency_true(k) = find(ramp(k,:) > 0, 1);
+end
+
+
 %----------------
 % allocate memory
 %----------------
@@ -43,17 +55,6 @@ extr_estimate = nan(numel(noises), n_sim);
 m5pc_estimate = nan(numel(noises), n_sim);
 nstd_estimate = nan(numel(noises), n_sim);
 tsdb_estimate = nan(numel(noises), n_sim);
-latency_true = nan(n_trials, 1);
-
-
-%--------------------
-% find "ground truth"
-%--------------------
-for k = 1:n_trials
-    % where the (noiseless) signal rises above 5% of the plateau
-    % (this is because sigmoid signals only asymptote to 0)
-    latency_true(k) = find(ramp(k,:) > 0.05, 1);
-end
 
 
 %-------------------
@@ -99,7 +100,7 @@ text(0.02, -140, 'ROC', 'color','k')
 % plot true latency
 true_x = [noises(1) noises(end)];
 true_y = [median(latency_true) median(latency_true)];
-plot(true_x, true_y, 'b', 'linewidth', 2)
-xlabel('noise st.d. [a.u.]')
+plot(true_x, true_y, 'b', 'linewidth', 2, 'linestyle', '--')
+xlabel('noise standard deviation [a.u.]')
 ylabel('estimated latency [a.u.]')
 
